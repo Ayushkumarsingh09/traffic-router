@@ -2,6 +2,16 @@
 
 Production-ready conditional traffic routing platform with **sparexpics.top-style replica landing** for Facebook in-app traffic.
 
+## Live Demo
+
+| Link | URL |
+|---|---|
+| **Live App** | https://traffic-router.vercel.app |
+| **Admin** | https://traffic-router.vercel.app/admin/login |
+| **GitHub** | https://github.com/Ayushkumarsingh09/traffic-router |
+
+See [docs/LIVE.md](./docs/LIVE.md) for credentials and database claim instructions.
+
 ## Features
 
 - sparexpics.top replica landing (OG meta, image gallery, desktop redirect, delayed CTA redirect)
