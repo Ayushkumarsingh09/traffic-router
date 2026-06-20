@@ -32,9 +32,9 @@ After claiming, update `DATABASE_URL` in Vercel if the connection string changes
 - [x] PostgreSQL provisioned (Prisma Postgres)
 - [x] Environment variables configured
 - [x] Database seeded with rules and replica settings
-- [ ] **Claim Prisma database** (see link above)
+- [x] `RUN_SEED=false` and `SEED_RULES=false` on Vercel
+- [ ] **Claim Prisma database** (requires browser — see link below)
 - [ ] Change `ADMIN_PASSWORD` in Vercel after first login
-- [ ] Set `RUN_SEED=false` in Vercel after first deploy
 
 ## Vercel Environment Variables
 
