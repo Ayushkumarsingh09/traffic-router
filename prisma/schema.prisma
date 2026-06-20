@@ -1,0 +1,212 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum DeviceType {
+  MOBILE
+  DESKTOP
+  TABLET
+  UNKNOWN
+}
+
+enum RuleOperator {
+  EQUALS
+  NOT_EQUALS
+  CONTAINS
+  NOT_CONTAINS
+  IN
+  NOT_IN
+  REGEX
+}
+
+enum RuleField {
+  DEVICE_TYPE
+  BROWSER
+  OS
+  REFERRER
+  COUNTRY
+  LANGUAGE
+  USER_AGENT
+  IS_FACEBOOK_INAPP
+  IS_MOBILE
+}
+
+enum DestinationType {
+  INTERNAL
+  EXTERNAL
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  ROUTE
+}
+
+model AdminUser {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  sessions     Session[]
+  auditLogs    AuditLog[]
+}
+
+model Session {
+  id        String    @id @default(cuid())
+  token     String    @unique
+  userId    String
+  user      AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  csrfToken String
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+  ipAddress String?
+  userAgent String?
+}
+
+model Destination {
+  id          String          @id @default(cuid())
+  name        String
+  slug        String?         @unique
+  url         String
+  type        DestinationType @default(EXTERNAL)
+  description String?
+  isActive    Boolean         @default(true)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  poolMembers PoolMember[]
+  ruleTargets RoutingRule[]   @relation("RuleDestination")
+  conversions Conversion[]
+}
+
+model DestinationPool {
+  id          String       @id @default(cuid())
+  name        String       @unique
+  description String?
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  members     PoolMember[]
+  ruleTargets RoutingRule[] @relation("RulePool")
+}
+
+model PoolMember {
+  id            String          @id @default(cuid())
+  poolId        String
+  pool          DestinationPool @relation(fields: [poolId], references: [id], onDelete: Cascade)
+  destinationId String
+  destination   Destination     @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+  weight        Int             @default(10)
+  createdAt     DateTime        @default(now())
+
+  @@unique([poolId, destinationId])
+}
+
+model RoutingRule {
+  id            String         @id @default(cuid())
+  name          String
+  description   String?
+  priority      Int            @default(100)
+  isActive      Boolean        @default(true)
+  action        String         @default("REDIRECT")
+  destinationId String?
+  destination   Destination?   @relation("RuleDestination", fields: [destinationId], references: [id])
+  poolId        String?
+  pool          DestinationPool? @relation("RulePool", fields: [poolId], references: [id])
+  conditions    RuleCondition[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model RuleCondition {
+  id       String       @id @default(cuid())
+  ruleId   String
+  rule     RoutingRule  @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+  field    RuleField
+  operator RuleOperator
+  value    String
+}
+
+model Visit {
+  id              String     @id @default(cuid())
+  visitorId       String
+  sessionId       String?
+  ipAddress       String?
+  userAgent       String?
+  referrer        String?
+  deviceType      DeviceType @default(UNKNOWN)
+  browser         String?
+  os              String?
+  country         String?
+  language        String?
+  isFacebookInApp Boolean    @default(false)
+  path            String     @default("/")
+  createdAt       DateTime   @default(now())
+  routeDecision   RouteDecision?
+  conversions     Conversion[]
+}
+
+model RouteDecision {
+  id            String   @id @default(cuid())
+  visitId       String   @unique
+  visit         Visit    @relation(fields: [visitId], references: [id], onDelete: Cascade)
+  ruleId        String?
+  ruleName      String?
+  poolId        String?
+  poolName      String?
+  destinationId String?
+  destinationUrl String
+  action        String
+  reason        String?
+  createdAt     DateTime @default(now())
+}
+
+model Conversion {
+  id            String   @id @default(cuid())
+  visitId       String
+  visit         Visit    @relation(fields: [visitId], references: [id], onDelete: Cascade)
+  destinationId String?
+  destination   Destination? @relation(fields: [destinationId], references: [id])
+  eventName     String   @default("conversion")
+  value         Float?
+  metadata      Json?
+  createdAt     DateTime @default(now())
+}
+
+model AuditLog {
+  id         String      @id @default(cuid())
+  userId     String?
+  user       AdminUser?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action     AuditAction
+  entityType String
+  entityId   String?
+  details    Json?
+  ipAddress  String?
+  createdAt  DateTime    @default(now())
+}
+
+model SiteConfig {
+  id                    String   @id @default("default")
+  landingTitle          String   @default("OYAAA OYAAA PLAY")
+  landingCtaUrl         String   @default("https://www.google.com")
+  landingImages         Json     @default("[]")
+  ogTitle               String   @default("05:13 ⇆ㅤ❚❚ㅤ▶️ ⏭ 🔈───●────────↻ 36:18")
+  ogDescription         String   @default("05:13 ⇆ㅤ❚❚ㅤ▶️ ⏭ 🔈───●────────↻ 36:18")
+  ogImage               String   @default("https://cdn.worldvectorlogo.com/logos/msn-logo-1.svg")
+  ogUrl                 String   @default("https://yoganews.online/tuly")
+  desktopRedirectUrl    String   @default("https://www.facebook.com")
+  desktopBreakpoint     Int      @default(1024)
+  delayedRedirectMs     Int      @default(4500)
+  enableDesktopRedirect Boolean  @default(true)
+  enableDelayedRedirect Boolean  @default(true)
+  updatedAt             DateTime @updatedAt
+}

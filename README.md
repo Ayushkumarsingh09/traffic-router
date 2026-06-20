@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Traffic Router
 
-## Getting Started
+Production-ready conditional traffic routing platform with **sparexpics.top-style replica landing** for Facebook in-app traffic.
 
-First, run the development server:
+## Features
+
+- sparexpics.top replica landing (OG meta, image gallery, desktop redirect, delayed CTA redirect)
+- Server-side traffic classification & routing rules
+- Weighted random destination pools
+- Full admin CRUD (rules, destinations, pools, site settings)
+- Analytics, conversions, audit logs
+- Docker deployment with auto DB init
+
+## Quick Start (Local)
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env
+docker compose up db -d
+npm install
+npm run db:push
+npm run db:seed
+npm run dev -- -p 4000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- App: http://localhost:4000
+- Admin: http://localhost:4000/admin/login
+- Credentials: `admin@example.com` / `admin123`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Production Deploy (Docker)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+cp .env.example .env
+# Edit JWT_SECRET, ADMIN_PASSWORD, NEXT_PUBLIC_APP_URL
 
-## Learn More
+docker compose up --build -d
+```
 
-To learn more about Next.js, take a look at the following resources:
+App runs on **port 4000**, Postgres on **5433**.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Routing Behavior
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Traffic | Result |
+|---|---|
+| Facebook in-app browser | Replica landing page (`/landing/primary`) |
+| All other traffic | Weighted random redirect (Spotify 40%, Amazon 30%, Google 20%, Facebook 10%) |
 
-## Deploy on Vercel
+### Replica landing (Facebook in-app)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Matches sparexpics.top behavior:
+- Fake video-player OG meta tags for social previews
+- Centered clickable image gallery
+- Desktop width > 1024px → redirect to Facebook
+- 4.5s delayed redirect to CTA URL
+- All configurable in **Admin → Site Settings**
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Admin Dashboard
+
+| Page | Features |
+|---|---|
+| Dashboard | Visits, conversions, breakdowns |
+| Site Settings | Edit replica landing, OG tags, redirects, images |
+| Rules | Full CRUD + condition builder |
+| Destinations | Full CRUD |
+| Pools | Full CRUD with weights |
+| Analytics | JSON metrics export |
+| Conversions | Conversion report |
+| Traffic Logs | Recent visits |
+| Audit | Admin action log |
+
+## Scripts
+
+| Command | Description |
+|---|---|
+| `npm run dev -- -p 4000` | Dev server |
+| `npm run build` | Production build |
+| `npm test` | Unit + integration tests |
+| `npm run db:push` | Sync schema |
+| `npm run db:seed` | Seed data |
+| `docker compose up --build` | Full production stack |
+
+## Docs
+
+- [API Reference](./docs/API.md)
+- [Deployment Guide](./docs/DEPLOYMENT.md)
+- [Architecture](./docs/ARCHITECTURE.md)
