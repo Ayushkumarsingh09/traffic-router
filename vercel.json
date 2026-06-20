@@ -1,5 +1,5 @@
 {
-  "buildCommand": "prisma generate && prisma db push --accept-data-loss && tsx prisma/seed.ts && next build",
+  "buildCommand": "npm run vercel-build",
   "installCommand": "npm ci",
   "framework": "nextjs",
   "regions": ["bom1"]

@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
-    "vercel-build": "prisma generate && prisma db push --accept-data-loss && tsx prisma/seed.ts && next build",
+    "vercel-build": "prisma generate && prisma db push --accept-data-loss && npx tsx prisma/seed.ts && next build",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
@@ -26,9 +26,11 @@
     "jsonwebtoken": "^9.0.3",
     "nanoid": "^5.1.15",
     "next": "16.2.9",
+    "prisma": "^6.19.3",
     "rate-limiter-flexible": "^11.2.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "tsx": "^4.22.4",
     "ua-parser-js": "^2.0.10",
     "zod": "^4.4.3"
   },
@@ -46,9 +48,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
     "jsdom": "^27.0.1",
-    "prisma": "^6.19.3",
     "tailwindcss": "^4",
-    "tsx": "^4.22.4",
     "typescript": "^5",
     "vitest": "^4.1.9"
   }
